@@ -1,0 +1,56 @@
+# Fails when NVIDIA ships something this profile mirrors: a new DGX OS
+# kernel or driver (Ubuntu noble-updates), a new DGX OS release, or a new
+# version of a DGX OS configuration package (NVIDIA's BaseOS apt repo). A
+# failed scheduled run is GitHub's notification; the log says what moved.
+#
+# Each value is what the profile was last reconciled against. After updating
+# the profile for a change, bump the value here.
+name: upstream
+
+on:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  # "<package> <version>" per line.
+  # Ubuntu source packages (noble-updates) that make up DGX OS's kernel/driver.
+  UBUNTU_PACKAGES: |
+    linux-nvidia-7.0 7.0.0-1019.19~24.04.2
+    nvidia-graphics-drivers-580 580.178.04-0ubuntu0.24.04.1
+  # NVIDIA BaseOS packages: the DGX OS release, then each one default.nix mirrors.
+  BASEOS_PACKAGES: |
+    dgx-spark-ota-update-meta 26.09.2
+    dgx-spark-mlnx-hotplug 26.01-1
+    nvidia-spark-grub-kho 1.0-1
+    nvidia-spark-grub-pci 1.0-1
+    nvidia-spark-initcall-bl 1.0-1
+    nvidia-spark-limits 1.0-1
+    nvidia-spark-realtek-mod-options 1.1-1
+    nvidia-cppc-cpufreq-options 25.06-1
+    nv-persistence-mode 25.10-1
+    nvidia-drm-options-modeset0 25.07-1
+    nvidia-sbsa-gwdt-options 25.06-1
+    nvidia-mstflint-loader 23.03-1
+    nv-limits 25.10-1
+    nv-cpu-governor 22.05-1
+    nvidia-kernel-defaults 21.05-1
+    nv-common-apis 26.08-2
+    nv-iommu 25.12-1
+    nvidia-disable-init-on-alloc 24.10-1
+    nvidia-console-settings 25.07-1
+    nvidia-earlycon 25.06-1
+    nvidia-spark-baud-rate 25.09-1
+    nvidia-nvme-options 26.02-1
+    nvidia-spark-fstab-config 1.0.0-1
+    nvidia-spark-wifi-fw-ppa 1.1-1
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: scripts/check-upstream.sh
